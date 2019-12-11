@@ -118,7 +118,7 @@ class ChatClient {
         let self = this;
         self.joinForm.addEventListener('submit', async e => {
             e.preventDefault();
-            const username = document.querySelector('#username').value;
+            const username = stripTags(document.querySelector('#username').value);
             if(username.length > 0) {
                 try {
                     const response = await postData({ url: '/api/join', data: { username } } );
