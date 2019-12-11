@@ -1,0 +1,9 @@
+textarea {
+    height: 180px;
+}
+
+*:focus,
+*:active {
+    outline-style: none;
+    box-shadow: none;
+}
