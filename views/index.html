@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<main id="chat" class="container mt-5 mb-5">
+
+    <p id="chat-info" class="text-center text-info mb-5"></p>
+
+    <form id="chat-join" class="mb-5" action="" method="post" novalidate>
+        <div class="input-group">
+            <input type="text" name="username" id="username" placeholder="Username" class="form-control">
+            <div class="input-group-append">
+                <input type="submit" value="Join chat" class="btn btn-outline-secondary">
+            </div>    
+        </div>
+    </form>
+
+    <section id="chat-wrap" class="d-none">
+        <div id="chat-messages" class="mb-5"></div>
+        <form>
+            <div class="form-group">
+                <textarea name="message" id="message" placeholder="Enter your message..." class="form-control"></textarea>
+            </div>
+            <p class="text-center">
+                <input type="button" id="send-message" value="Send Message" class="btn btn-success mr-4">
+                <input type="button" id="leave-chat" value="Leave Chat" class="btn btn-danger">
+            </p>
+        </form>
+    </section>
+
+</main>
+<script src="public/js/chat.js"></script>
+</body>
+</html>
