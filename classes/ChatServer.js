@@ -30,7 +30,7 @@ class ChatServer {
 
     join(req, res) {
         const {username} = req.body;
-        if (this.users.indexOf(username) === -1) {
+        if (!this.users.includes(username)) {
             this.users.push(username);
             this.client.set('users', JSON.stringify(this.users));
             res.send({
