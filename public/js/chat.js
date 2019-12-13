@@ -6,6 +6,14 @@ const displayTime = timestamp => {
     return timeago.format(time);
 };
 
+const displayMessage = ({ target, type, text}) => {
+    const msg = document.createElement('div');
+    msg.className = `alert alert-${type} mt-5 mb-5`;
+    msg.innerText = text;
+
+    target.appendChild(msg);
+};
+
 const stripTags = input => {
 
     const tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi
@@ -60,6 +68,8 @@ class ChatClient {
         this.chatMessages = document.querySelector('#chat-messages');
         this.sendMessageBtn = document.querySelector('#send-message');
         this.leaveChatBtn = document.querySelector('#leave-chat');
+        this.chatActions = document.querySelector('#chat-actions');
+
 
         if(sessionStorage.getItem('username') !== null) {
             this.toggleChat();
@@ -123,18 +133,31 @@ class ChatClient {
         } 
     }
 
+    async postMessage() {
+        let self = this;
+        const msg = document.querySelector('#message').value;
+        if(msg.length > 0 && !/^\s+$/.test(msg)) {
+            const data = {
+                username: sessionStorage.getItem('username'),
+                message: stripTags(msg)
+            };
+            self.socket.send(JSON.stringify(data));
+            await postData({url: '/api/send', data});
+            await self.getMessages();
+        } 
+    }
+
     sendMessage() {
         let self = this;
         self.sendMessageBtn.addEventListener('click', async () => {
-            const msg = document.querySelector('#message').value;
-            if(msg.length > 0 && !/^\s+$/.test(msg)) {
-                const data = {
-                    username: sessionStorage.getItem('username'),
-                    message: stripTags(msg)
-                };
-                self.socket.send(JSON.stringify(data));
-                await postData({url: '/api/send', data});
-                await self.getMessages();
+            await self.postMessage();
+        }, false);
+
+        document.querySelector('#message').addEventListener('keydown', async e => {
+            const keyPressed = e.key;
+            if(keyPressed === 'Enter') {
+                e.preventDefault();
+                await self.postMessage(); 
             }
         }, false);
     }
@@ -144,20 +167,38 @@ class ChatClient {
         self.joinForm.addEventListener('submit', async e => {
             e.preventDefault();
             const username = stripTags(document.querySelector('#username').value);
+            const msgs = self.joinForm.querySelectorAll('.alert');
+            if(msgs.length > 0) {
+                msgs.forEach(message => {
+                    self.joinForm.removeChild(message);
+                });
+            }
             if(username.length > 0) {
                 try {
                     const response = await postData({ url: '/api/join', data: { username } } );
                     if(response.error) {
-                        alert(response.error);
+                        displayMessage({
+                            target: self.joinForm,
+                            type: 'danger',
+                            text: response.error
+                        });
                     } else {
                         self.toggleChat(username);
                         self.events.trigger('change');
                     }
                 } catch(err) {
-                    console.log(err);
+                    displayMessage({
+                        target: self.joinForm,
+                        type: 'danger',
+                        text: JSON.stringify(err)
+                    });
                 }
             } else {
-                alert('Invalid username!');
+                displayMessage({
+                    target: self.joinForm,
+                    type: 'danger',
+                    text: 'Invalid username.'
+                });
             }
         }, false);
     }
