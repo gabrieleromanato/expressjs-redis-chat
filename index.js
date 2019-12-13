@@ -5,10 +5,22 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const redis = require('redis');
+const WebSocket = require('ws');
 const port = process.env.PORT || 3000;
 const ChatServer = require('./classes/ChatServer');
 
 const chat = new ChatServer(redis);
+const wss = new WebSocket.Server({ port: 8080 });
+
+wss.on('connection', ws => {
+    ws.on('message', function incoming(data)  {
+      wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(chat.messages));
+        }
+      });
+    });
+});
 
 app.disable('x-powered-by');
 

@@ -7,3 +7,37 @@ textarea {
     outline-style: none;
     box-shadow: none;
 }
+
+#chat-messages blockquote {
+    padding: 1em 1em 1em 40px;
+    line-height: 1.5;
+    border: 1px solid #ddd;
+    position: relative;
+}
+
+#chat-messages blockquote img.avatar {
+    position: absolute;
+    top: 1em;
+    left: 5px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+}
+
+#chat-messages blockquote:nth-child(even) {
+    background-color: #eee;
+}
+
+#chat-messages blockquote div cite {
+    font-style: normal;
+    color: #000;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+}
+
+#chat-messages blockquote div time {
+    font-size: 0.85em;
+    display: block;
+    margin-top: 4px;
+}

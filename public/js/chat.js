@@ -1,5 +1,11 @@
 'use strict';
 
+
+const displayTime = timestamp => {
+    const time = new Date(parseInt(timestamp, 10));
+    return timeago.format(time);
+};
+
 const stripTags = input => {
 
     const tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi
@@ -46,7 +52,7 @@ class Events {
 
 class ChatClient {
     constructor() {
-        this.socket = {};
+        this.socket = new WebSocket('ws://127.0.0.1:8080');
         this.info = document.querySelector('#chat-info');
         this.joinForm = document.querySelector('#chat-join');
         this.userCount = 0;
@@ -69,6 +75,16 @@ class ChatClient {
         this.events.on('change', instance  => {
             instance.getInfo();
         });
+
+        this.ws(); 
+
+    }
+
+    ws() {
+        let self = this;
+        self.socket.onmessage = async message => {
+            await self.getMessages();
+        };   
     }
 
     async getInfo() {
@@ -90,7 +106,16 @@ class ChatClient {
         if(Array.isArray(messages) && messages.length > 0) {
             let html = '';
             for(const message of messages) {
-                let str = `<blockquote><div><cite>${message.username}</cite></div><p>${message.message}</p></blockquote>`;
+                let avatar = (message.avatarImg.length > 0) ? message.avatarImg : '/public/images/avatar.png';
+                let time = displayTime(message.time);
+                let str = `<blockquote>
+                    <img class="avatar" src="${avatar}">
+                    <div>
+                      <cite>${message.username}</cite>
+                      <time>${time}</time>
+                    </div>
+                    <p>${message.message}</p>
+                    </blockquote>`;
                 html += str;
             }
 
@@ -107,7 +132,7 @@ class ChatClient {
                     username: sessionStorage.getItem('username'),
                     message: stripTags(msg)
                 };
-
+                self.socket.send(JSON.stringify(data));
                 await postData({url: '/api/send', data});
                 await self.getMessages();
             }
