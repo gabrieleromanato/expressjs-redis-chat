@@ -1,5 +1,8 @@
 'use strict';
 
+const {avatar} = require('../utils');
+const validator = require('validator');
+
 class ChatServer {
     constructor(pubSubLib) {
         this.pubSubLib = pubSubLib;
@@ -54,11 +57,18 @@ class ChatServer {
 
     send(req, res) {
         const {username, message} = req.body;
+        const time = Date.now();
+        const avatarImg = (validator.isEmail(username)) ? avatar(username) : '';
+
         this.messages.push({
             username,
-            message
+            message,
+            time,
+            avatarImg
         });
+
         this.client.set('messages', JSON.stringify(this.messages));
+        
         res.send({
             done: true
         });
