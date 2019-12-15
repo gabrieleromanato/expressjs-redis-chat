@@ -10,13 +10,18 @@
         "validator": "^12.1.0",
         "ws": "^7.2.0"
     },
+    "jest": {
+        "testEnvironment": "node"
+    },
     "main": "index.js",
     "scripts": {
         "start": "node index.js",
-        "dev": "nodemon -e js,html,css"
+        "dev": "nodemon -e js,html,css",
+        "test": "jest --watchAll"
     },
     "devDependencies": {
         "axios": "^0.19.0",
+        "jest": "^24.9.0",
         "nodemon": "^2.0.2"
     }
 }
