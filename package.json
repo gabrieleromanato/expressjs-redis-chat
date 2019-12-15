@@ -12,6 +12,11 @@
     },
     "main": "index.js",
     "scripts": {
-        "start": "node index.js"
+        "start": "node index.js",
+        "dev": "nodemon -e js,html,css"
+    },
+    "devDependencies": {
+        "axios": "^0.19.0",
+        "nodemon": "^2.0.2"
     }
 }

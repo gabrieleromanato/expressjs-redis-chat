@@ -21,13 +21,6 @@ class ChatClient {
         this.joinChat();
         this.sendMessage();
         this.leaveChat();
-
-        this.events = new Events(this);
-
-        this.events.on('change', instance  => {
-            instance.getInfo();
-        });
-
         this.ws(); 
 
     }
@@ -35,7 +28,10 @@ class ChatClient {
     ws() {
         let self = this;
         self.socket.onmessage = async message => {
-            await self.getMessages();
+            const response = JSON.parse(message.data);
+            const {method} = response;
+            await self[method]();
+            
         };   
     }
 
@@ -45,13 +41,24 @@ class ChatClient {
 
         if(Array.isArray(users)) {
             const total = users.length;
-            this.info.innerText = `There are currently ${total} users in this chat room.`;
+            if(sessionStorage.getItem('username') !== null && total > 0) {
+
+                const currentUser = sessionStorage.getItem('username');
+                const onlineUsers = users.filter(user => user !== currentUser);
+                if(onlineUsers.length > 0) {
+                    const online = onlineUsers.join(', ');
+                    this.info.innerText = `They are online: ${online}`;
+                }
+                
+            }
+
             this.userCount = total;
         }
 
     }
 
     async getMessages() {
+
         const response = await fetch('/api/messages');
         const messages = await response.json();
 
@@ -83,9 +90,9 @@ class ChatClient {
                 username: sessionStorage.getItem('username'),
                 message: stripTags(msg)
             };
-            self.socket.send(JSON.stringify(data));
+            
             await postData({url: '/api/send', data});
-            await self.getMessages();
+            self.socket.send('messages');
         } 
     }
 
@@ -126,7 +133,7 @@ class ChatClient {
                         });
                     } else {
                         self.toggleChat(username);
-                        self.events.trigger('change');
+                        self.socket.send('info');
                     }
                 } catch(err) {
                     displayMessage({
@@ -153,7 +160,7 @@ class ChatClient {
             sessionStorage.removeItem('username');
             self.chatWrap.classList.toggle('d-none');
             self.joinForm.classList.remove('d-none');
-            self.events.trigger('change');
+            self.socket.send('info');
 
         }, false);
     }
@@ -163,7 +170,7 @@ class ChatClient {
         if(username.length > 0) {
             sessionStorage.setItem('username', username);
         }
-        await self.getMessages();
+        self.socket.send('messages');
         self.chatWrap.classList.toggle('d-none');
         self.joinForm.classList.add('d-none');
     }
