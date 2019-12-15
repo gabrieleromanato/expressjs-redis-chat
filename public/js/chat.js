@@ -11,26 +11,46 @@ class ChatClient {
         this.sendMessageBtn = document.querySelector('#send-message');
         this.leaveChatBtn = document.querySelector('#leave-chat');
         this.chatActions = document.querySelector('#chat-actions');
+        this.chatWrapper = document.querySelector('#chat-wrapper');
+        this.toggleChatBtn = document.querySelector('#chat-toggle');
+        this.chatCloseBtn = document.querySelector('#chat-close');
 
 
         if(sessionStorage.getItem('username') !== null) {
-            this.toggleChat();
+            this.socket.onopen = e => {
+                this.toggleChat();
+                this.chatWrapper.classList.add('in');
+                scrollIntoView(this.chatMessages);
+            };    
         }
 
+        this.openClose();
         this.getInfo();
         this.joinChat();
         this.sendMessage();
         this.leaveChat();
-        this.ws(); 
+        this.ws();
+        
+        addMobileClass(document.body);
 
     }
 
+    openClose() {
+        this.toggleChatBtn.addEventListener('click', e => {
+            e.preventDefault();
+            this.chatWrapper.classList.add('in');
+        }, false);
+        this.chatCloseBtn.addEventListener('click', e => {
+            e.preventDefault();
+            this.chatWrapper.classList.remove('in');
+        }, false);
+    }
+
     ws() {
-        let self = this;
-        self.socket.onmessage = async message => {
+        this.socket.onmessage = async message => {
             const response = JSON.parse(message.data);
             const {method} = response;
-            await self[method]();
+            await this[method]();
             
         };   
     }
@@ -46,8 +66,8 @@ class ChatClient {
                 const currentUser = sessionStorage.getItem('username');
                 const onlineUsers = users.filter(user => user !== currentUser);
                 if(onlineUsers.length > 0) {
-                    const online = onlineUsers.join(', ');
-                    this.info.innerText = `They are online: ${online}`;
+                    const online = onlineUsers.length;
+                    this.info.innerText = `There are ${online} users online`;
                 }
                 
             }
@@ -83,7 +103,6 @@ class ChatClient {
     }
 
     async postMessage() {
-        let self = this;
         const msg = document.querySelector('#message').value;
         if(msg.length > 0 && !/^\s+$/.test(msg)) {
             const data = {
@@ -92,28 +111,26 @@ class ChatClient {
             };
             
             await postData({url: '/api/send', data});
-            self.socket.send('messages');
+            this.socket.send('messages');
         } 
     }
 
     sendMessage() {
-        let self = this;
-        self.sendMessageBtn.addEventListener('click', async () => {
-            await self.postMessage();
-        }, false);
-
         document.querySelector('#message').addEventListener('keydown', async e => {
             const keyPressed = e.key;
             if(keyPressed === 'Enter') {
                 e.preventDefault();
-                await self.postMessage(); 
+                await this.postMessage();
+                scrollIntoView(this.chatMessages);
             }
         }, false);
     }
 
     joinChat() {
+
         let self = this;
-        self.joinForm.addEventListener('submit', async e => {
+        
+        this.joinForm.addEventListener('submit', async e => {
             e.preventDefault();
             const username = stripTags(document.querySelector('#username').value);
             const msgs = self.joinForm.querySelectorAll('.alert');
@@ -127,24 +144,24 @@ class ChatClient {
                     const response = await postData({ url: '/api/join', data: { username } } );
                     if(response.error) {
                         displayMessage({
-                            target: self.joinForm,
+                            target: this.joinForm,
                             type: 'danger',
                             text: response.error
                         });
                     } else {
-                        self.toggleChat(username);
-                        self.socket.send('info');
+                        this.toggleChat(username);
+                        this.socket.send('info');
                     }
                 } catch(err) {
                     displayMessage({
-                        target: self.joinForm,
+                        target: this.joinForm,
                         type: 'danger',
                         text: JSON.stringify(err)
                     });
                 }
             } else {
                 displayMessage({
-                    target: self.joinForm,
+                    target: this.joinForm,
                     type: 'danger',
                     text: 'Invalid username.'
                 });
@@ -153,26 +170,27 @@ class ChatClient {
     }
 
     leaveChat() {
-        let self = this;
-        self.leaveChatBtn.addEventListener('click', async () => {
+        this.leaveChatBtn.addEventListener('click', async e => {
+            e.preventDefault();
             const username = sessionStorage.getItem('username');
             await postData({url: '/api/leave', username});
             sessionStorage.removeItem('username');
-            self.chatWrap.classList.toggle('d-none');
-            self.joinForm.classList.remove('d-none');
-            self.socket.send('info');
+            this.chatWrap.classList.toggle('d-none');
+            this.joinForm.classList.remove('d-none');
+            this.socket.send('info');
 
         }, false);
     }
 
-    async toggleChat(username = '') {
-        let self = this;
+    toggleChat(username = '') {
         if(username.length > 0) {
             sessionStorage.setItem('username', username);
         }
-        self.socket.send('messages');
-        self.chatWrap.classList.toggle('d-none');
-        self.joinForm.classList.add('d-none');
+        if(this.socket.readyState === 1) {
+            this.socket.send('messages');
+        }    
+        this.chatWrap.classList.toggle('d-none');
+        this.joinForm.classList.add('d-none');
     }
 }
 

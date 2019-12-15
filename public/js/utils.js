@@ -33,3 +33,15 @@ const postData = async ({url, data}) => {
 
     return await response.json();
 };
+
+const scrollIntoView = element => {
+  setTimeout(() => {
+    element.scrollTop = ( element.scrollHeight - element.clientHeight ); 
+  }, 500);  
+};
+
+const addMobileClass = element => {
+    if(/mobile/i.test(navigator.userAgent)) {
+        element.classList.add('mobile');
+    }
+};

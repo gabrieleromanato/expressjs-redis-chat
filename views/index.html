@@ -3,34 +3,46 @@
 <head>
     <title>Chat with ExpressJS and Redis</title>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="public/css/style.css" type="text/css" media="screen">
 </head>
 <body>
-<main id="chat" class="container">
+<main id="chat">
 
-    <p id="chat-info" class="text-center"></p>
+    <a href="#chat-wrapper" id="chat-toggle">
+        <i class="far fa-comment-dots" aria-hidden="true"></i>
+    </a>
 
-    <form id="chat-join" action="" method="post" novalidate>
-        <div class="input-group">
-            <input type="text" name="username" id="username" placeholder="Username or email" class="form-control">
-            <div class="input-group-append">
-                <input type="submit" value="Join chat" class="btn btn-outline-secondary">
-            </div>    
-        </div>
-    </form>
+    <section id="chat-wrapper">
+        <a href="#chat-wrapper" id="chat-close">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </a>
+        <a href="#" id="leave-chat">
+            <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+        </a>
 
-    <section id="chat-wrap" class="d-none">
-        <div id="chat-messages"></div>
-        <form id="chat-actions">
-            <div class="form-group">
-                <textarea name="message" id="message" placeholder="Enter your message..." class="form-control"></textarea>
+        <div id="chat-info" class="text-center"></div>
+
+        <form id="chat-join" action="" method="post" novalidate>
+            <div class="input-group">
+                <input type="text" name="username" id="username" placeholder="Username or email" class="form-control">
+                <div class="input-group-append">
+                    <input type="submit" value="Join chat" class="btn btn-outline-secondary">
+                </div>    
             </div>
-            <p class="text-center">
-                <input type="button" id="send-message" value="Send Message" class="btn btn-success mr-4">
-                <input type="button" id="leave-chat" value="Leave Chat" class="btn btn-danger">
-            </p>
         </form>
+
+        <section id="chat-wrap" class="d-none">
+            
+            <div id="chat-messages"></div>
+            <form id="chat-actions">
+                <div class="form-group">
+                    <textarea name="message" id="message" placeholder="Enter your message..." class="form-control"></textarea>
+                </div>
+            </form>
+        </section>
+
     </section>
 
 </main>
